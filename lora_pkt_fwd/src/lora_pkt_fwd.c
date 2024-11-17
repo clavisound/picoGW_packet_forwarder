@@ -2011,10 +2011,14 @@ void thread_down(void) {
                 jit_result = JIT_ERROR_TX_FREQ;
                 MSG("ERROR: Packet REJECTED, unsupported frequency - %u (min:%u,max:%u)\n", txpkt.freq_hz, tx_freq_min[txpkt.rf_chain], tx_freq_max[txpkt.rf_chain]);
             }
-            if (jit_result == JIT_ERROR_OK) {
-                for (i = 0; i < txlut.size; i++) {
-                    if (txlut.lut[i].rf_power == txpkt.rf_power) {
-                        /* this RF power is supported, we can continue */
+            if (jit_result == JIT_ERROR_OK) 
+                /* Suggestion from https://www.thethingsnetwork.org/forum/t/error-packet-rejected-unsupported-rf-power-for-tx-24/34833/44 */
+                for (i = txlut.size-1; 0; i--) {
+                    if (txlut.lut[i].rf_power <= txpkt.rf_power) {
+                      /* Found an exact match or next lowest power, we can continue*/
+                        MSG("INFO: Selected RF power for TX - %d\n", txpkt.rf_power);
+                        MSG("INFO: txlut.lut[i].rf_power: %d\n", txlut.lut[i].rf_power);
+                        MSG("INFO: i: %d\n", i);
                         break;
                     }
                 }
